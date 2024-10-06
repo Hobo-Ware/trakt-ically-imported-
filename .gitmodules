@@ -1,3 +1,3 @@
 [submodule "tv-time-liberator"]
-	path = tv-time-liberator
-	url = https://github.com/Hobo-Ware/tv-time-liberator
+    path = .submodule/tv-time-liberator
+    url = https://github.com/Hobo-Ware/tv-time-liberator

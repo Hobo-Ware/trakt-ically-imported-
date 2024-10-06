@@ -9,6 +9,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@dvcol/trakt-http-client": "^1.4.16"
+    "@dvcol/trakt-http-client": "^1.4.16",
+    "file-system-db": "^2.1.0"
   }
 }
