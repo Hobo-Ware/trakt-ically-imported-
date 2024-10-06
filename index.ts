@@ -1,6 +1,6 @@
 import { LIBERATOR_EXPORT_PATH } from './src/env/LIBERATOR_EXPORT_PATH';
 import { rateLimit, client as trakt } from './src/trakt/client';
-import type { Movie, Show } from './src/types';
+import type { Movie, Show, List } from './src/types';
 import { readFile } from 'fs/promises';
 
 async function traktUnlimited() {
@@ -16,6 +16,9 @@ const shows: Show[] = JSON
 
 const movies: Movie[] = JSON
     .parse(await readFile(`${LIBERATOR_EXPORT_PATH}/movies.json`, 'utf-8'));
+
+const favorites: List = JSON
+    .parse(await readFile(`${LIBERATOR_EXPORT_PATH}/favorites.json`, 'utf-8'));
 
 /**
  * * * * *  Add shows and movies to watchlist  * * * * *
@@ -150,3 +153,72 @@ await traktUnlimited()
                 console.log('--- Stopped shows hidden from recommendations: ', await response.text());
             })
     );
+
+/*
+* * * * *  Add favorites to lists  * * * * *
+*/
+const FAVORITE_MAX = 1;
+
+const favoriteShows = favorites
+    .shows
+    .map(show => ({
+        ids: {
+            tvdb: show.id.tvdb,
+            imdb: show.id.imdb === '-1'
+                ? ''
+                : show.id.imdb,
+            slug: '',
+            tmdb: -Infinity,
+            trakt: -Infinity,
+        }
+    }));
+
+const favoriteMovies = favorites
+    .movies
+    .map(movie => ({
+        ids: {
+            imdb: movie.id.imdb,
+            slug: '',
+            tmdb: -Infinity,
+            trakt: -Infinity,
+        }
+    }));
+
+const totalFavorites = favoriteShows.length + favoriteMovies.length;
+const isTraktFavoriteLimitExceeded = totalFavorites > FAVORITE_MAX;
+
+if (isTraktFavoriteLimitExceeded) {
+    console.log(`--- Favorites list exceeds the Trakt ${FAVORITE_MAX} limit.`);
+    console.log('--- No worries, original favorite list will be created as a custom list, called "TV Time Favorites".');
+
+    await traktUnlimited()
+        .then(trakt =>
+            trakt
+                .users
+                .lists
+                .create({
+                    name: 'TV Time Favorites',
+                    description: 'Favorites list from TV Time.',
+                    privacy: favorites.is_public ? 'public' : 'private',
+                    id: 'me',
+                })
+                .then(async res => {
+                    const { ids: { slug } } = await res.json();
+
+                    await trakt
+                        .users
+                        .list
+                        .items
+                        .add({
+                            id: 'me',
+                            list_id: slug,
+                            movies: favoriteMovies,
+                            shows: favoriteShows,
+                        });
+                })
+                .catch(async error => {
+                    console.error('--- Error adding favorites to custom list: ', await error);
+                    return null;
+                })
+        );
+}
