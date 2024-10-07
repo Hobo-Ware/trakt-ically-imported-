@@ -1,11 +1,13 @@
 import { Config } from '@dvcol/trakt-http-client/config';
-import { PersistentStore as db } from '../store';
+import { PersistentStore } from '../store';
 import type { TraktClientSettings } from '@dvcol/trakt-http-client/models';
 import { TraktClient } from '@dvcol/trakt-http-client';
 import { traktApi } from '@dvcol/trakt-http-client/api';
 import { name } from '../../package.json';
 import { TRAKT_CLIENT_ID } from '../env/TRAKT_CLIENT_ID';
 import { TRAKT_CLIENT_SECRET } from '../env/TRAKT_CLIENT_SECRET';
+
+const db = await PersistentStore.create(PersistentStore.namespacedPath(TRAKT_CLIENT_ID));
 
 enum TraktValue {
     Token = 'trakt_token',
