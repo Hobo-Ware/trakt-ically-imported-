@@ -150,3 +150,5 @@ await traktUnlimited()
                 console.log('--- Stopped shows hidden from recommendations: ', await response.text());
             })
     );
+
+process.exit(0);
