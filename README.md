@@ -13,6 +13,7 @@ This tool is the perfect companion to [tv-time-liberator](https://github.com/Hob
 
 1. Liberate your data: Export your data from TV Time using [tv-time-liberator](https://github.com/Hobo-Ware/tv-time-liberator/).
 1. Clone trakt-ically-imported: and follow the instructions below.
+    - This repository uses submodules, be sure to run `git submodule update --init --recursive` after cloning.
 
 # Usage:
 
